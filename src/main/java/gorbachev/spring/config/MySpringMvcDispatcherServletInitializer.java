@@ -12,18 +12,18 @@ import java.util.EnumSet;
 
 public class MySpringMvcDispatcherServletInitializer extends AbstractAnnotationConfigDispatcherServletInitializer {
     @Override
-    public void onStartup(ServletContext aServletContext) throws ServletException {   //rus
+    public void onStartup(ServletContext aServletContext) throws ServletException {
         super.onStartup(aServletContext);
         registerCharacterEncodingFilter(aServletContext);
         registerHiddenFieldFilter(aServletContext);
     }
 
-    private void registerHiddenFieldFilter(ServletContext aContext) { //rus
+    private void registerHiddenFieldFilter(ServletContext aContext) {
         aContext.addFilter("hiddenHttpMethodFilter",
-                new HiddenHttpMethodFilter()).addMappingForUrlPatterns(null, true, "/*");
+                new HiddenHttpMethodFilter()).addMappingForUrlPatterns(null, true, "/*");  //фильтр для работы html с http методами
     }
 
-    private void registerCharacterEncodingFilter(ServletContext aContext) {  //rus
+    private void registerCharacterEncodingFilter(ServletContext aContext) {                                   //для отображения русских символов
         EnumSet<DispatcherType> dispatcherTypes = EnumSet.of(DispatcherType.REQUEST, DispatcherType.FORWARD);
 
         CharacterEncodingFilter characterEncodingFilter = new CharacterEncodingFilter();
