@@ -14,11 +14,11 @@ public class PersonDAO {             //для инкапсуляции Person
 
     {
         people = new ArrayList<>();
-        people.add(new Person(++peopleCount, "Evgen"));
-        people.add(new Person(++peopleCount, "Ivan"));
-        people.add(new Person(++peopleCount, "Alex"));
-        people.add(new Person(++peopleCount, "Liza"));
-        people.add(new Person(++peopleCount, "Чмоникс"));
+        people.add(new Person(++peopleCount, "Evgen", 25, "gorbachev.zhenya@gmail.com"));
+        people.add(new Person(++peopleCount, "Ivan", 18, "tiktokdvizhenie@yahoo.com"));
+        people.add(new Person(++peopleCount, "Alex", 14, "zxcghouldeadinside@gmail.com"));
+        people.add(new Person(++peopleCount, "Liza", 32, "dsflo21@gmail.com"));
+        people.add(new Person(++peopleCount, "Чмоникс", 45, "sdfs@gmail.com"));
     }
 
     public List<Person> index() { //возвращаем список people
@@ -37,6 +37,8 @@ public class PersonDAO {             //для инкапсуляции Person
     public void update(int id, Person updatedPerson) { //заменяем текущие данные человека новыми
         Person personToBeUpdated = show(id);
         personToBeUpdated.setName(updatedPerson.getName());
+        personToBeUpdated.setAge(updatedPerson.getAge());
+        personToBeUpdated.setEmail(updatedPerson.getEmail());
     }
 
     public void delete(int id) {
