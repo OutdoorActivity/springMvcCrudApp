@@ -1,8 +1,12 @@
 package gorbachev.spring.dao;
 
 import gorbachev.spring.models.Person;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.jdbc.core.BeanPropertyRowMapper;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.PathVariable;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -12,27 +16,13 @@ import static java.sql.DriverManager.getConnection;
 
 @Component
 public class PersonDAO {             //для инкапсуляции Person
-    private static int peopleCount;  //для уникального id пользователя
-    private static final String URL = "jdbc:postgresql://localhost:5432/first_db";
-    private static final String USERNAME = "postgres";
-    private static final String PASSWORD = "huitaslonika1204ssdKSDFJI";
+    private final JdbcTemplate jdbcTemplate;
 
-    private static Connection connection;
-
-    static {
-        try {
-            Class.forName("org.postgresql.Driver"); //c помощью рефлексии загружается драйвер для работы с БД
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        }
-        try {
-            connection = getConnection(URL, USERNAME, PASSWORD); //инициализация подключения к БД
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
-        }
-
+    @Autowired
+    public PersonDAO(JdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
     }
-//    private List<Person> people;                 // старый упрощённый вариант БД
+    //    private List<Person> people;                 // старый упрощённый вариант БД
 //
 //    {
 //        people = new ArrayList<>();
@@ -40,54 +30,29 @@ public class PersonDAO {             //для инкапсуляции Person
 //        people.add(new Person(++peopleCount, "Ivan", 18, "tiktokdvizhenie@yahoo.com"));
 //        people.add(new Person(++peopleCount, "Alex", 14, "zxcghouldeadinside@gmail.com"));
 //        people.add(new Person(++peopleCount, "Liza", 32, "dsflo21@gmail.com"));
-//        people.add(new Person(++peopleCount, "Чмоникс", 45, "sdfs@gmail.com"));
+//        people.add(new Person(++peopleCount, "Zuko", 72, "sdfs@gmail.com"));
 //    }
 
     public List<Person> index() { //возвращаем список people
-        List<Person> people = new ArrayList<>();
-        try {
-            Statement statement = connection.createStatement();  //объект, который содержит в себе sql запросы к БД
-            String SQL = "SELECT * FROM person";
-            ResultSet resultSet = statement.executeQuery(SQL);   //объект, инкапсулирующий результат выполнения запроса к БД
-            while (resultSet.next()) {                  //без Hibernate вручную добавляю поля из таблицы и преобразую в объект
-                Person person = new Person();
-                person.setId(resultSet.getInt("id"));
-                person.setName(resultSet.getString("name"));
-                person.setEmail(resultSet.getString("email"));
-                person.setAge(resultSet.getInt("age"));
-                people.add(person);
-            }
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
-        }
-        return people;
+        return jdbcTemplate.query("SELECT * FROM person", new BeanPropertyRowMapper<>(Person.class));
     }
 
-    public Person show(int id) {    //получить человека с нужным id или вернуть null
-//        return people.stream().filter(person -> person.getId() == id).findAny().orElse(null);
-        return null;
+    public Person show(int id) {     //получить человека с нужным id или вернуть null
+        return jdbcTemplate.query("SELECT * FROM person WHERE id=?", new Object[]{id}, new BeanPropertyRowMapper<>(Person.class))
+                .stream().findAny().orElse(null);
     }
 
     public void save(Person person) {   //сохраняем человека в БД
-        try {
-            Statement statement = connection.createStatement();
-            String SQL = "INSERT INTO person VALUES(" + 1 + ",'" + person.getName() + "'," + person.getAge() + ",'" + person.getEmail() + "')"; // ручное неэффективное добавление INSERT INTO person VALUES(1, 'Evgen', 25, 'gorbachev.evgen@gmail.com')
-            statement.executeUpdate(SQL);
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
-        }
-//        person.setId(++peopleCount);
-//        people.add(person);
+        jdbcTemplate.update("INSERT INTO person(name, age, email) VALUES (?,?,?)", person.getName(), person.getAge(), person.getEmail());
+
     }
 
     public void update(int id, Person updatedPerson) { //заменяем текущие данные человека новыми
-//        Person personToBeUpdated = show(id);
-//        personToBeUpdated.setName(updatedPerson.getName());
-//        personToBeUpdated.setAge(updatedPerson.getAge());
-//        personToBeUpdated.setEmail(updatedPerson.getEmail());
+        jdbcTemplate.update("UPDATE person SET name=?, age=?, email=? WHERE id=?", updatedPerson.getName(),
+                updatedPerson.getAge(), updatedPerson.getEmail(), id);
     }
 
     public void delete(int id) {
-//        people.removeIf(person -> person.getId() == id); //if id true then delete from people
+        jdbcTemplate.update("DELETE FROM person WHERE id=?", id);
     }
 }
